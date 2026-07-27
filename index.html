@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<meta name="theme-color" content="#000000">
+
+<title>...</title>
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: monospace;
+}
+
+body {
+    color: #00ff41;
+}
+
+/* =========================
+   BINARY BACKGROUND
+========================= */
+
+#matrix {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+
+#content {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 2;
+
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+#content.show {
+    opacity: 1;
+}
+
+/* =========================
+   SKULL
+========================= */
+
+#skull {
+    font-size: clamp(90px, 25vw, 180px);
+    color: #00ff41;
+
+    filter:
+        drop-shadow(0 0 8px #00ff41)
+        drop-shadow(0 0 20px #00ff41);
+
+    animation: glitch 0.15s infinite alternate;
+}
+
+@keyframes glitch {
+
+    0% {
+        transform: translate(0, 0);
+    }
+
+    20% {
+        transform: translate(-3px, 2px);
+    }
+
+    40% {
+        transform: translate(3px, -2px);
+    }
+
+    60% {
+        transform: translate(-2px, -3px);
+    }
+
+    80% {
+        transform: translate(2px, 3px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+
+}
+
+/* =========================
+   TEXT
+========================= */
+
+#status {
+
+    margin-top: 20px;
+
+    font-size: clamp(16px, 5vw, 25px);
+
+    letter-spacing: 4px;
+
+    text-align: center;
+
+    text-shadow:
+        0 0 5px #00ff41,
+        0 0 10px #00ff41;
+}
+
+/* =========================
+   LOADING BAR
+========================= */
+
+#loaderContainer {
+
+    width: min(80%, 450px);
+    height: 22px;
+
+    border: 2px solid #00ff41;
+
+    margin-top: 35px;
+
+    display: none;
+
+    box-shadow:
+        0 0 5px #00ff41,
+        0 0 15px #00ff41;
+}
+
+#loader {
+
+    height: 100%;
+    width: 0%;
+
+    background: #00ff41;
+
+    box-shadow:
+        0 0 10px #00ff41,
+        0 0 20px #00ff41;
+}
+
+#loader.loading {
+    animation: load 3s linear forwards;
+}
+
+@keyframes load {
+
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
+
+}
+
+/* =========================
+   PERCENTAGE
+========================= */
+
+#percentage {
+
+    display: none;
+
+    margin-top: 12px;
+
+    font-size: 18px;
+
+    letter-spacing: 2px;
+}
+
+/* =========================
+   BLACK SCREEN
+========================= */
+
+#blackout {
+
+    position: fixed;
+    inset: 0;
+
+    background: #000;
+
+    z-index: 9999;
+
+    display: none;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+
+<div id="content">
+
+    <div id="skull">☠</div>
+
+    <div id="status">
+        DEVICE CONNECTION ESTABLISHED
+    </div>
+
+    <div id="loaderContainer">
+        <div id="loader"></div>
+    </div>
+
+    <div id="percentage">
+        0%
+    </div>
+
+</div>
+
+
+<div id="blackout"></div>
+
+
+<script>
+
+/* ==========================================
+   MATRIX BINARY EFFECT
+========================================== */
+
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+let width;
+let height;
+
+const fontSize = 16;
+
+let columns;
+let drops;
+
+
+/* Resize canvas */
+
+function resize() {
+
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+
+    columns = Math.floor(width / fontSize);
+
+    drops = [];
+
+    for (let i = 0; i < columns; i++) {
+        drops[i] = Math.random() * -50;
+    }
+
+}
+
+resize();
+
+window.addEventListener("resize", resize);
+
+
+/* Draw binary */
+
+function drawMatrix() {
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    ctx.fillStyle = "#00ff41";
+
+    ctx.font = fontSize + "px monospace";
+
+
+    for (let i = 0; i < drops.length; i++) {
+
+        const text =
+            Math.random() > 0.5
+            ? "1"
+            : "0";
+
+
+        ctx.fillText(
+            text,
+            i * fontSize,
+            drops[i] * fontSize
+        );
+
+
+        if (
+            drops[i] * fontSize > height &&
+            Math.random() > 0.975
+        ) {
+
+            drops[i] = 0;
+
+        }
+
+
+        drops[i]++;
+
+    }
+
+}
+
+
+const matrixInterval =
+    setInterval(drawMatrix, 35);
+
+
+
+/* ==========================================
+   ELEMENTS
+========================================== */
+
+const content =
+    document.getElementById("content");
+
+const status =
+    document.getElementById("status");
+
+const loaderContainer =
+    document.getElementById("loaderContainer");
+
+const loader =
+    document.getElementById("loader");
+
+const percentage =
+    document.getElementById("percentage");
+
+const blackout =
+    document.getElementById("blackout");
+
+
+
+/* ==========================================
+   START SEQUENCE
+========================================== */
+
+
+/*
+   0 - 1.3 sec
+
+   Binary only
+*/
+
+
+setTimeout(() => {
+
+    content.classList.add("show");
+
+}, 1300);
+
+
+
+/*
+   Skull appears
+*/
+
+
+setTimeout(() => {
+
+    status.innerText =
+        "ACCESSING DEVICE...";
+
+}, 2200);
+
+
+
+/*
+   Loading bar starts
+*/
+
+
+setTimeout(() => {
+
+    status.innerText =
+        "UPLOADING PAYLOAD";
+
+    loaderContainer.style.display =
+        "block";
+
+    percentage.style.display =
+        "block";
+
+    loader.classList.add("loading");
+
+
+    let startTime = Date.now();
+
+    const loadingDuration = 3000;
+
+
+    const counter =
+        setInterval(() => {
+
+            const elapsed =
+                Date.now() - startTime;
+
+
+            const progress =
+                Math.min(
+                    100,
+                    Math.floor(
+                        (elapsed / loadingDuration) * 100
+                    )
+                );
+
+
+            percentage.innerText =
+                progress + "%";
+
+
+            if (progress >= 100) {
+
+                clearInterval(counter);
+
+            }
+
+        }, 30);
+
+
+}, 3000);
+
+
+
+/*
+   Loading finishes after exactly 3 seconds
+*/
+
+
+setTimeout(() => {
+
+    status.innerText =
+        "COMPLETE";
+
+    percentage.innerText =
+        "100%";
+
+}, 6000);
+
+
+
+/*
+   Black screen
+*/
+
+
+setTimeout(() => {
+
+    clearInterval(matrixInterval);
+
+    canvas.style.display =
+        "none";
+
+    content.style.display =
+        "none";
+
+    blackout.style.display =
+        "block";
+
+}, 6500);
+
+
+
+/*
+   Stay black for 2 seconds,
+   then try returning to previous page.
+*/
+
+
+setTimeout(() => {
+
+    if (window.history.length > 1) {
+
+        window.history.back();
+
+    } else {
+
+        blackout.style.display =
+            "none";
+
+        document.body.innerHTML = "";
+
+        document.body.style.background =
+            "#000";
+
+    }
+
+}, 8500);
+
+</script>
+
+</body>
+</html>
