@@ -5,7 +5,7 @@
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
 >
 
 <meta name="theme-color" content="#000000">
@@ -24,6 +24,7 @@ html,
 body {
     width: 100%;
     height: 100%;
+    min-height: 100dvh;
     overflow: hidden;
     background: #000;
     font-family: monospace;
@@ -34,16 +35,77 @@ body {
 }
 
 /* =========================
+   TAP TO START
+========================= */
+
+#startScreen {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background: #000;
+
+    z-index: 10000;
+
+    cursor: pointer;
+
+    color: #00ff41;
+
+    text-align: center;
+
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#startTitle {
+    font-size: clamp(20px, 6vw, 32px);
+
+    letter-spacing: 3px;
+
+    text-shadow:
+        0 0 5px #00ff41,
+        0 0 15px #00ff41;
+}
+
+#startText {
+    margin-top: 20px;
+
+    font-size: clamp(14px, 4vw, 20px);
+
+    letter-spacing: 2px;
+
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.25;
+    }
+}
+
+
+/* =========================
    BINARY BACKGROUND
 ========================= */
 
 #matrix {
     position: fixed;
     inset: 0;
+
     width: 100%;
     height: 100%;
-    display: block;
+
+    display: none;
 }
+
 
 /* =========================
    MAIN CONTENT
@@ -53,7 +115,7 @@ body {
     position: fixed;
     inset: 0;
 
-    display: flex;
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -61,6 +123,7 @@ body {
     z-index: 2;
 
     opacity: 0;
+
     transition: opacity 0.4s;
 }
 
@@ -68,12 +131,14 @@ body {
     opacity: 1;
 }
 
+
 /* =========================
    SKULL
 ========================= */
 
 #skull {
     font-size: clamp(90px, 25vw, 180px);
+
     color: #00ff41;
 
     filter:
@@ -111,6 +176,7 @@ body {
 
 }
 
+
 /* =========================
    TEXT
 ========================= */
@@ -130,6 +196,7 @@ body {
         0 0 10px #00ff41;
 }
 
+
 /* =========================
    LOADING BAR
 ========================= */
@@ -137,6 +204,7 @@ body {
 #loaderContainer {
 
     width: min(80%, 450px);
+
     height: 22px;
 
     border: 2px solid #00ff41;
@@ -153,6 +221,7 @@ body {
 #loader {
 
     height: 100%;
+
     width: 0%;
 
     background: #00ff41;
@@ -163,7 +232,9 @@ body {
 }
 
 #loader.loading {
+
     animation: load 3s linear forwards;
+
 }
 
 @keyframes load {
@@ -177,6 +248,7 @@ body {
     }
 
 }
+
 
 /* =========================
    PERCENTAGE
@@ -193,6 +265,7 @@ body {
     letter-spacing: 2px;
 }
 
+
 /* =========================
    BLACK SCREEN
 ========================= */
@@ -200,6 +273,7 @@ body {
 #blackout {
 
     position: fixed;
+
     inset: 0;
 
     background: #000;
@@ -215,20 +289,48 @@ body {
 
 <body>
 
+
+<!-- TAP SCREEN -->
+
+<div id="startScreen">
+
+    <div id="startTitle">
+        NFC CONNECTION DETECTED
+    </div>
+
+    <div id="startText">
+        TAP TO VERIFY
+    </div>
+
+</div>
+
+
+
+<!-- MATRIX -->
+
 <canvas id="matrix"></canvas>
 
 
+
+<!-- MAIN CONTENT -->
+
 <div id="content">
 
-    <div id="skull">☠</div>
+    <div id="skull">
+        ☠
+    </div>
 
     <div id="status">
         DEVICE CONNECTION ESTABLISHED
     </div>
 
+
     <div id="loaderContainer">
+
         <div id="loader"></div>
+
     </div>
+
 
     <div id="percentage">
         0%
@@ -237,108 +339,29 @@ body {
 </div>
 
 
+
+<!-- BLACKOUT -->
+
 <div id="blackout"></div>
 
 
+
 <script>
-
-/* ==========================================
-   MATRIX BINARY EFFECT
-========================================== */
-
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-let width;
-let height;
-
-const fontSize = 16;
-
-let columns;
-let drops;
-
-
-/* Resize canvas */
-
-function resize() {
-
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-
-    columns = Math.floor(width / fontSize);
-
-    drops = [];
-
-    for (let i = 0; i < columns; i++) {
-        drops[i] = Math.random() * -50;
-    }
-
-}
-
-resize();
-
-window.addEventListener("resize", resize);
-
-
-/* Draw binary */
-
-function drawMatrix() {
-
-    ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
-
-    ctx.fillRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    ctx.fillStyle = "#00ff41";
-
-    ctx.font = fontSize + "px monospace";
-
-
-    for (let i = 0; i < drops.length; i++) {
-
-        const text =
-            Math.random() > 0.5
-            ? "1"
-            : "0";
-
-
-        ctx.fillText(
-            text,
-            i * fontSize,
-            drops[i] * fontSize
-        );
-
-
-        if (
-            drops[i] * fontSize > height &&
-            Math.random() > 0.975
-        ) {
-
-            drops[i] = 0;
-
-        }
-
-
-        drops[i]++;
-
-    }
-
-}
-
-
-const matrixInterval =
-    setInterval(drawMatrix, 35);
-
 
 
 /* ==========================================
    ELEMENTS
 ========================================== */
+
+
+const startScreen =
+    document.getElementById("startScreen");
+
+const canvas =
+    document.getElementById("matrix");
+
+const ctx =
+    canvas.getContext("2d");
 
 const content =
     document.getElementById("content");
@@ -361,160 +384,460 @@ const blackout =
 
 
 /* ==========================================
-   START SEQUENCE
+   MATRIX SETTINGS
 ========================================== */
 
 
-/*
-   0 - 1.3 sec
+let width;
+let height;
 
-   Binary only
-*/
+const fontSize = 16;
 
+let columns;
+let drops;
 
-setTimeout(() => {
+let matrixInterval = null;
 
-    content.classList.add("show");
 
-}, 1300);
 
+function resize() {
 
+    width =
+        canvas.width =
+        window.innerWidth;
 
-/*
-   Skull appears
-*/
+    height =
+        canvas.height =
+        window.innerHeight;
 
 
-setTimeout(() => {
+    columns =
+        Math.floor(width / fontSize);
 
-    status.innerText =
-        "ACCESSING DEVICE...";
 
-}, 2200);
+    drops = [];
 
 
+    for (
+        let i = 0;
+        i < columns;
+        i++
+    ) {
 
-/*
-   Loading bar starts
-*/
-
-
-setTimeout(() => {
-
-    status.innerText =
-        "UPLOADING PAYLOAD";
-
-    loaderContainer.style.display =
-        "block";
-
-    percentage.style.display =
-        "block";
-
-    loader.classList.add("loading");
-
-
-    let startTime = Date.now();
-
-    const loadingDuration = 3000;
-
-
-    const counter =
-        setInterval(() => {
-
-            const elapsed =
-                Date.now() - startTime;
-
-
-            const progress =
-                Math.min(
-                    100,
-                    Math.floor(
-                        (elapsed / loadingDuration) * 100
-                    )
-                );
-
-
-            percentage.innerText =
-                progress + "%";
-
-
-            if (progress >= 100) {
-
-                clearInterval(counter);
-
-            }
-
-        }, 30);
-
-
-}, 3000);
-
-
-
-/*
-   Loading finishes after exactly 3 seconds
-*/
-
-
-setTimeout(() => {
-
-    status.innerText =
-        "COMPLETE";
-
-    percentage.innerText =
-        "100%";
-
-}, 6000);
-
-
-
-/*
-   Black screen
-*/
-
-
-setTimeout(() => {
-
-    clearInterval(matrixInterval);
-
-    canvas.style.display =
-        "none";
-
-    content.style.display =
-        "none";
-
-    blackout.style.display =
-        "block";
-
-}, 6500);
-
-
-
-/*
-   Stay black for 2 seconds,
-   then try returning to previous page.
-*/
-
-
-setTimeout(() => {
-
-    if (window.history.length > 1) {
-
-        window.history.back();
-
-    } else {
-
-        blackout.style.display =
-            "none";
-
-        document.body.innerHTML = "";
-
-        document.body.style.background =
-            "#000";
+        drops[i] =
+            Math.random() * -50;
 
     }
 
-}, 8500);
+}
+
+
+resize();
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+
+
+/* ==========================================
+   MATRIX DRAWING
+========================================== */
+
+
+function drawMatrix() {
+
+
+    ctx.fillStyle =
+        "rgba(0, 0, 0, 0.12)";
+
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    ctx.fillStyle =
+        "#00ff41";
+
+
+    ctx.font =
+        fontSize + "px monospace";
+
+
+    for (
+        let i = 0;
+        i < drops.length;
+        i++
+    ) {
+
+
+        const text =
+            Math.random() > 0.5
+            ? "1"
+            : "0";
+
+
+        ctx.fillText(
+            text,
+            i * fontSize,
+            drops[i] * fontSize
+        );
+
+
+        if (
+            drops[i] * fontSize >
+            height
+            &&
+            Math.random() > 0.975
+        ) {
+
+            drops[i] = 0;
+
+        }
+
+
+        drops[i]++;
+
+    }
+
+}
+
+
+
+/* ==========================================
+   FULLSCREEN
+========================================== */
+
+
+async function goFullscreen() {
+
+    const element =
+        document.documentElement;
+
+
+    try {
+
+        if (element.requestFullscreen) {
+
+            await element.requestFullscreen();
+
+        }
+
+        else if (
+            element.webkitRequestFullscreen
+        ) {
+
+            element.webkitRequestFullscreen();
+
+        }
+
+        else if (
+            element.msRequestFullscreen
+        ) {
+
+            element.msRequestFullscreen();
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "Fullscreen unavailable:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/* ==========================================
+   START PRANK
+========================================== */
+
+
+let started = false;
+
+
+async function startPrank() {
+
+
+    if (started) {
+        return;
+    }
+
+
+    started = true;
+
+
+    /*
+       Try fullscreen first
+    */
+
+    await goFullscreen();
+
+
+    /*
+       Hide tap screen
+    */
+
+    startScreen.style.display =
+        "none";
+
+
+    /*
+       Show matrix
+    */
+
+    canvas.style.display =
+        "block";
+
+
+    /*
+       Start matrix
+    */
+
+    matrixInterval =
+        setInterval(
+            drawMatrix,
+            35
+        );
+
+
+    /*
+       Enable content container
+       but keep invisible
+    */
+
+    content.style.display =
+        "flex";
+
+
+    /*
+       1.3 seconds
+       Skull appears
+    */
+
+    setTimeout(() => {
+
+        content.classList.add(
+            "show"
+        );
+
+    }, 1300);
+
+
+
+    /*
+       2.2 seconds
+    */
+
+    setTimeout(() => {
+
+        status.innerText =
+            "ACCESSING DEVICE...";
+
+    }, 2200);
+
+
+
+    /*
+       3 seconds
+       Loading begins
+    */
+
+    setTimeout(() => {
+
+
+        status.innerText =
+            "UPLOADING PAYLOAD";
+
+
+        loaderContainer.style.display =
+            "block";
+
+
+        percentage.style.display =
+            "block";
+
+
+        loader.classList.add(
+            "loading"
+        );
+
+
+        const startTime =
+            Date.now();
+
+
+        const loadingDuration =
+            3000;
+
+
+        const counter =
+            setInterval(() => {
+
+
+                const elapsed =
+                    Date.now()
+                    -
+                    startTime;
+
+
+                const progress =
+                    Math.min(
+
+                        100,
+
+                        Math.floor(
+                            (
+                                elapsed
+                                /
+                                loadingDuration
+                            )
+                            *
+                            100
+                        )
+
+                    );
+
+
+                percentage.innerText =
+                    progress + "%";
+
+
+                if (
+                    progress >= 100
+                ) {
+
+                    clearInterval(
+                        counter
+                    );
+
+                }
+
+
+            }, 30);
+
+
+    }, 3000);
+
+
+
+    /*
+       6 seconds
+       Complete
+    */
+
+    setTimeout(() => {
+
+        status.innerText =
+            "COMPLETE";
+
+        percentage.innerText =
+            "100%";
+
+    }, 6000);
+
+
+
+    /*
+       6.5 seconds
+       BLACK SCREEN
+    */
+
+    setTimeout(() => {
+
+
+        if (matrixInterval) {
+
+            clearInterval(
+                matrixInterval
+            );
+
+        }
+
+
+        canvas.style.display =
+            "none";
+
+
+        content.style.display =
+            "none";
+
+
+        blackout.style.display =
+            "block";
+
+
+    }, 6500);
+
+
+
+    /*
+       Black for two seconds
+       then return
+    */
+
+    setTimeout(() => {
+
+
+        if (
+            window.history.length > 1
+        ) {
+
+            window.history.back();
+
+        }
+
+        else {
+
+            blackout.style.display =
+                "none";
+
+
+            document.body.innerHTML =
+                "";
+
+
+            document.body.style.background =
+                "#000";
+
+        }
+
+
+    }, 8500);
+
+}
+
+
+
+/* ==========================================
+   TAP LISTENERS
+========================================== */
+
+
+startScreen.addEventListener(
+    "click",
+    startPrank,
+    { once: true }
+);
+
+
+startScreen.addEventListener(
+    "touchend",
+    startPrank,
+    { once: true }
+);
+
 
 </script>
 
